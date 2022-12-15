@@ -109,6 +109,30 @@ end
 #showアクションを作成→app/controllers/lists_controller.rb内の「def show..end」の「end」の上に「 @list = List.find(params[:id])」追記
 #show.html.erbを作成・ビューに記述→app/views/lists/show.html.erb内に「<h2>タイトル</h2>～<p><%= @list.body %></p>」記述
 #indexにshowへのリンクを作成→app/views/lists/index.html.erb内の「<span></span>」内を変更
-##ルーティング(名前付きルート設定)→config/routes.rb内の「get 'lists/:id' => 'lists#show'」を「get 'lists/:id' => 'lists#show', as: 'list'」に書き換え
+#ルーティング(名前付きルート設定)→config/routes.rb内の「get 'lists/:id' => 'lists#show'」を「get 'lists/:id' => 'lists#show', as: 'list'」に書き換え
  #indexのlink_toを変更→app/views/lists/index.html.erb内の「<span></span>」内を「 <%= link_to list.title, list_path(list.id) %> 」に変更
  #createアクションのredirect_toを変更→app/controllers/lists_controller.rb内の「def create..end」内の「redirect_to '/top'」を「redirect_to list_path(list.id) 」に変更
+
+#編集機能を作る
+#編集フォームを作成
+ #コントローラ→app/controllers/lists_controller.rb内の「def edit..end」内に「@list = List.find(params[:id])」追加
+ #ビュー→app/views/lists/edit.html.erb内の「<h1>編集画面</h1>～<% end %>」に書き換え
+ #ルーティング→config/routes.rb内の「get 'lists/edit'」削除、「Rails.application.routes.draw do～end」を削除したところに追加
+ #更新機能を追加
+#コントローラ→app/controllers/lists_controller.rb内に「def edit..end」の下に「def update..end」を追加
+#ルーティング→ config/routes.rb内の「get 'lists/:id/edit' => 'lists#edit', as: 'edit_list'」の下に「patch 'lists/:id' => 'lists#update', as: 'update_list'」追加
+#ビュー(記述追加)→app/views/lists/edit.html.erb内の「%= form_with model: @list do |f| %>」を
+ #「<%= form_with model: @list, url: update_list_path(@list.id), method: :patch do |f| %>」に書き換え
+#詳細画面に編集画面へのリンクを追加→app/views/lists/show.html.erb内の一番下に「<%= link_to "編集", edit_list_path(@list.id) %>」追加
+
+#画像投稿機能を作る
+#ActiveStorageをインストール→ターミナルで「rails active_storage:install」実行、そのあと「rails db:migrate」実行
+#モデルに記述を追加→app/models/list.rb内に「class List < ApplicationRecord～end」記述
+#画像を投稿できるようにする
+ #ビューに記述を追加→app/views/lists/new.html.erb内に「<h4>画像</h4><%= f.file_field :image, accept: "image/*" %>」追加(<%= f.text_area :body %>の下に記述)
+ #コントローラ(値を受け取る許可)→app/controllers/lists_controller.rb内の「def list_params..end」内「(:title, :body）」に「, :image」追加
+#ビューで画像を表示
+ #一覧画面(index)→app/views/lists/index.html.erb内「<% end %>」の上に「<p>画像</p><%= image_tag list.image, size: "200x200" %>」追加
+  #エラーの回避→app/views/lists/index.html内「<p>画像</p>」の下に「<% if list.image.attached? %>」と
+  #「<%= image_tag list.image, size: "200x200" %>」の下に「<% else %>～<% end %>」追加
+ #詳細画面(show)→app/views/lists/show.html.erb内の「<p><%= @list.body %></p>」の下に「<h2>画像</h2>～<% end %>」追加
